@@ -42,18 +42,18 @@ class UserTest extends \PHPUnit_Framework_TestCase {
         $new_user = new \Parse\User;
         $new_user->username = $this->testUser['username'];
         $new_user->password = $this->testUser['password'];
-        $returnSignup = $new_user->signup();
+        $objectId = $new_user->signup();
         
-        //$returnSignup->isActive = true;
-        //$returnSignup->save();
+        $new_user->isActive = true;
+        $new_user->update();
         
         $login = new \Parse\User;
         $login->username = $this->testUser['username'];
         $login->password = $this->testUser['password'];
         $returnLogin = $login->login();
         
-        $this->assertTrue(property_exists($returnLogin,'objectId'));
-        $this->assertEquals($returnLogin->objectId, $returnSignup->objectId);
+        $this->assertNotNull($objectId);
+        $this->assertEquals($returnLogin->objectId, $objectId);
         
         
         

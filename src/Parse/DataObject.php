@@ -4,8 +4,9 @@ namespace Parse;
 class DataObject extends \Parse {
 	public $_includes = array();
 	private $_className = '';
+        protected $_url = 'classes';
 
-	public function __construct($class=''){
+        public function __construct($class=''){
 		if($class != ''){
 			$this->_className = $class;
 		}
@@ -21,12 +22,16 @@ class DataObject extends \Parse {
 			$this->data[$name] = $value;
 		}
 	}
+        
+        public function __get($name) {
+            return $this->data[$name];
+        }
 
 	public function save(){
 		if(count($this->data) > 0 && $this->_className != ''){
 			$request = $this->request(array(
 				'method' => 'POST',
-				'requestUrl' => 'classes/'.$this->_className,
+				'requestUrl' => $this->_url . '/' . $this->_className,
 				'data' => $this->data,
 			));
 			return $request;
@@ -37,7 +42,7 @@ class DataObject extends \Parse {
 		if($this->_className != '' || !empty($id)){
 			$request = $this->request(array(
 				'method' => 'GET',
-				'requestUrl' => 'classes/'.$this->_className.'/'.$id
+				'requestUrl' => $this->_url . '/' . $this->_className.'/'.$id
 			));
 			
 			if(!empty($this->_includes)){
@@ -52,7 +57,7 @@ class DataObject extends \Parse {
 		if($this->_className != '' || !empty($id)){
 			$request = $this->request(array(
 				'method' => 'PUT',
-				'requestUrl' => 'classes/'.$this->_className.'/'.$id,
+				'requestUrl' => $this->_url . '/' . $this->_className.'/'.$id,
 				'data' => $this->data,
 			));
 
@@ -73,7 +78,7 @@ class DataObject extends \Parse {
 		if($this->_className != '' || !empty($id)){
 			$request = $this->request(array(
 				'method' => 'DELETE',
-				'requestUrl' => 'classes/'.$this->_className.'/'.$id
+				'requestUrl' => $this->_url . '/' . $this->_className.'/'.$id
 			));
 
 			return $request;

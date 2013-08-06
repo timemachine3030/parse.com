@@ -2,14 +2,25 @@
 
 namespace Parse;
 
-class User extends \Parse {
+class User extends DataObject {
 
     public $authData;
+    public $objectId;
+    public $createdAt;
+    protected $_url = '';
+    protected $_sessionToken;
 
-    public function __set($name, $value) {
-        $this->data[$name] = $value;
+    public function __construct() {
+        parent::__construct('users');
     }
-
+    /**
+     * 
+     * @param type $username
+     * @param type $password
+     * @return string
+     * 
+     * Returns the objectId of the new user.
+     */
     public function signup($username = '', $password = '') {
         if ($username != '' && $password != '') {
             $this->username = $username;
@@ -22,8 +33,12 @@ class User extends \Parse {
                 'requestUrl' => 'users',
                 'data' => $this->data
             ));
+            
+            $this->createdAt = $request->createdAt;
+            $this->objectId = $request->objectId;
+            $this->_sessionToken = $request->sessionToken;
 
-            return $request;
+            return $this->objectId;
         } else {
             $this->throwError('username and password fields are required for the signup method');
         }
@@ -74,13 +89,12 @@ class User extends \Parse {
         }
     }
 
-    //TODO: should make the parseUser contruct accept the objectId and update and delete would only require the sessionToken
-    public function update($objectId, $sessionToken) {
-        if (!empty($objectId) || !empty($sessionToken)) {
+    public function update() {        
+        if (!empty($this->objectId) || !empty($this->_sessionToken)) {
             $request = $this->request(array(
                 'method' => 'PUT',
-                'requestUrl' => 'users/' . $objectId,
-                'sessionToken' => $sessionToken,
+                'requestUrl' => 'users/' . $this->objectId,
+                'sessionToken' => $this->_sessionToken,
                 'data' => $this->data
             ));
 
@@ -147,6 +161,7 @@ class User extends \Parse {
             $this->throwError('objectId and sessionToken are required for the linkAccounts method');
         }
     }
+    
 
     public function requestPasswordReset($email) {
         if (!empty($email)) {
