@@ -1,5 +1,5 @@
 <?php
-
+namespace Parse;
 class File extends \Parse {
 
 	private $_fileName;

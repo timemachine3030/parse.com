@@ -1,5 +1,5 @@
 <?php
-
+namespace Parse;
 class User extends \Parse {
 
 	public $authData;

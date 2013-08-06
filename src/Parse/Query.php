@@ -1,5 +1,6 @@
 <?php
 
+namespace Parse;
 class Query extends \Parse {
 	private $_limit = 100;
 	private $_skip = 0;

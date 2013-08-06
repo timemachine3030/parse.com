@@ -1,6 +1,6 @@
 <?php
 
-namespace \Parse;
+namespace Parse;
 class GeoPoint extends \Parse {
 
 	public $lat;
