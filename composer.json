@@ -1,0 +1,14 @@
+{
+    "name": "timemachine3030/parse.com",
+    "description": "A PHP Library for Parse.com",
+    "authors": [
+        {
+            "name": "Dan Lopretto",
+            "email": "timemachine3030@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+
+    }
+}

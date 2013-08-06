@@ -13,7 +13,8 @@ $acl->setWriteAccessForRole('role_name',true);
 $object->ACL($acl);
 $object->save();
 */
-class parseACL{
+namespace Parse;
+class ACL {
 	public $acl;
 	public function __construct(){
 		$this->acl = new stdClass();

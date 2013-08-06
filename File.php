@@ -1,6 +1,6 @@
 <?php
 
-class parseFile extends parseRestClient{
+class File extends \Parse {
 
 	private $_fileName;
 	private $_contentType;

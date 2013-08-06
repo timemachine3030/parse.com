@@ -1,0 +1,11 @@
+<?php
+
+namespace Parse;
+class Config {
+
+    const APPID = '';
+    const MASTERKEY = '';
+    const RESTKEY = '';
+    const PARSEURL = 'https://api.parse.com/1/';
+}
+

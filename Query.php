@@ -1,6 +1,6 @@
 <?php
 
-class parseQuery extends parseRestClient{
+class Query extends \Parse {
 	private $_limit = 100;
 	private $_skip = 0;
 	private $_count = 0;
