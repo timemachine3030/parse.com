@@ -50,20 +50,34 @@ class UserTest extends \PHPUnit_Framework_TestCase {
         $login = new \Parse\User;
         $login->username = $this->testUser['username'];
         $login->password = $this->testUser['password'];
-        $returnLogin = $login->login();
+        $login->login();
         
         $this->assertNotNull($objectId);
-        $this->assertEquals($returnLogin->objectId, $objectId);
-        
-        
+        $this->assertEquals($login->objectId, $objectId);
         
     }
 
+    
+    public function testHasRole() {
+        $user = new \Parse\User;
+        $user->where('username', 'dan_test');
+        $user->get();
+        
+        $this->assertTrue($user->hasRole('admin'));
+           
+        $user = new \Parse\User;
+        $user->where('username', 'dan_test2');
+        $user->get();
+        
+        $this->assertFalse($user->hasRole('admin'));
+    }
     /**
      * @covers Parse\User::login
      */
     public function testLogin() {
-        
+        $this->markTestIncomplete(
+                'This test has not been implemented yet.'
+        );
     }
 
     /**

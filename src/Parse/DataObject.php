@@ -5,6 +5,7 @@ class DataObject extends \Parse {
 	public $_includes = array();
 	private $_className = '';
         protected $_url = 'classes';
+        protected $_clauses = array();
 
         public function __construct($class=''){
 		if($class != ''){
@@ -38,22 +39,58 @@ class DataObject extends \Parse {
 		}
 	}
 
-	public function get($id){
-		if($this->_className != '' || !empty($id)){
-			$request = $this->request(array(
-				'method' => 'GET',
-				'requestUrl' => $this->_url . '/' . $this->_className.'/'.$id
-			));
-			
-			if(!empty($this->_includes)){
-				$request['include'] = implode(',', $this->_includes);
-			}
-			
-			return $request;
-		}
-	}
+    public function get($id = false) {
+        if (!$id && $this->objectId) {
+            $id = $this->objectId;
+        }
+        
+        if ($this->_className != '') {
+            if (!empty($id)) {
+                $requestUrl = $this->_url . '/' . $this->_className . '/' . $id;
+            } else {
+                $requestUrl = $this->_url . '/' . $this->_className;
+            }
+            
+            $args = array(
+                'method' => 'GET',
+                'requestUrl' => $requestUrl
+            );
 
-	public function update($id){
+            if (count($this->_clauses)) {
+                $args['where'] = $this->_clauses;
+            }
+
+            $request = $this->request($args);
+
+            if (!empty($this->_includes)) {
+                $request->include = implode(',', $this->_includes);
+            }
+            
+            if (is_array($request->results) && count($request->results)) {
+                if (count($request->results) > 1) {
+                    $return = array();
+                    foreach ($request->results as $obj) {
+                        $return[] = $this->classMapper($obj, $this->_classNmae);
+                    }
+                    return $return;
+                } else {
+                    foreach ($request->results[0] as $key => $value) {
+                        $this->$key = $value;
+                    }
+                    return $this;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            $this->throwError("need classname to 'get' a dataobject");
+        }
+    }
+
+	public function update($id = false){
+            if (!$id && $this->objectId) {
+                $id = $this->objectId;
+            }
 		if($this->_className != '' || !empty($id)){
 			$request = $this->request(array(
 				'method' => 'PUT',
@@ -88,6 +125,19 @@ class DataObject extends \Parse {
 	public function addInclude($name){
 		$this->_includes[] = $name;
 	}
+        
+        public function where($key, $value) {
+            $this->_clauses[$key] = $value;
+        }
+        
+        private function classMapper($instance, $classNmae) {
+            return unserialize(sprintf(
+                'O:%d:"%s"%s',
+                strlen($className),
+                $className,
+                strstr(strstr(serialize($instance), '"'), ':')
+            ));
+        }
 }
 
 ?>

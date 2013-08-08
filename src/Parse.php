@@ -38,6 +38,9 @@ class Parse {
      */	
     public function request($args){
         $isFile = false;
+        
+        $url = $this->_parseurl . $args['requestUrl'];
+        
         $c = curl_init();
         curl_setopt($c, CURLOPT_TIMEOUT, 30);
         curl_setopt($c, CURLOPT_USERAGENT, 'parse.com-php-library/2.0');
@@ -67,9 +70,7 @@ class Parse {
                 'X-Parse-Master-Key: '.$this->_masterkey
             ));	
         }
-        curl_setopt($c, CURLOPT_CUSTOMREQUEST, $args['method']);
-        $url = $this->_parseurl . $args['requestUrl'];
-
+        
         if($args['method'] == 'PUT' || $args['method'] == 'POST'){
             if($isFile){
                 $postData = $args['data'];
@@ -79,15 +80,25 @@ class Parse {
             }
 
             curl_setopt($c, CURLOPT_POSTFIELDS, $postData );
+        } else if (array_key_exists('where', $args)) {
+            $where_clause = json_encode($args['where']);
+            $new_url = array(
+                'query' => http_build_query(array(
+                    'where' => $where_clause
+                ))
+            );
+            $url = http_build_url($url, $new_url, HTTP_URL_JOIN_QUERY);;
         }
-
+        
+        curl_setopt($c, CURLOPT_CUSTOMREQUEST, $args['method']);
+        
         if($args['requestUrl'] == 'login'){
             $urlParams = http_build_query($args['data'], '', '&');
-            $url = $url.'?'.$urlParams;
+            $url = http_build_url($url, array('query' => $urlParams), HTTP_URL_JOIN_QUERY);
         }
         if(array_key_exists('urlParams',$args)){
             $urlParams = http_build_query($args['urlParams'], '', '&');
-            $url = $url.'?'.$urlParams;
+            $url = http_build_url($url, array('query' => $urlParams), HTTP_URL_JOIN_QUERY);
         }
 
         curl_setopt($c, CURLOPT_URL, $url);

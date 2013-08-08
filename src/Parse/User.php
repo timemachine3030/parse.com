@@ -55,7 +55,11 @@ class User extends DataObject {
                 )
             ));
 
-            return $request;
+            $this->createdAt = $request->createdAt;
+            $this->objectId = $request->objectId;
+            $this->_sessionToken = $request->sessionToken;
+
+            return $this;
         } else {
             $this->throwError('username and password field are required for the login method');
         }
@@ -75,40 +79,27 @@ class User extends DataObject {
             $this->throwError('authArray must be set use addAuthData method');
         }
     }
-
-    public function get($objectId) {
-        if ($objectId != '') {
-            $request = $this->request(array(
-                'method' => 'GET',
-                'requestUrl' => 'users/' . $objectId,
-            ));
-
-            return $request;
-        } else {
-            $this->throwError('objectId is required for the get method');
-        }
+    
+    /**
+     * 
+     * @return string
+     */
+    public function getSessionToken() {
+        return $this->_sessionToken;
     }
-
-    public function update() {        
-        if (!empty($this->objectId) || !empty($this->_sessionToken)) {
-            $request = $this->request(array(
-                'method' => 'PUT',
-                'requestUrl' => 'users/' . $this->objectId,
-                'sessionToken' => $this->_sessionToken,
-                'data' => $this->data
-            ));
-
-            return $request;
-        } else {
-            $this->throwError('objectId and sessionToken are required for the update method');
-        }
-    }
-
-    public function delete($objectId, $sessionToken) {
-        if (!empty($objectId) || !empty($sessionToken)) {
+    
+    /**
+     * $sessionToken must be a valid session representing a user with privlages 
+     * to delete 'this' user.
+     * 
+     * @param string $sessionToken
+     * @return object
+     */
+    public function delete($sessionToken) {
+        if (!empty($this->objectId) || !empty($sessionToken)) {
             $request = $this->request(array(
                 'method' => 'DELETE',
-                'requestUrl' => 'users/' . $objectId,
+                'requestUrl' => 'users/' . $this->objectId,
                 'sessionToken' => $sessionToken
             ));
 
@@ -178,7 +169,25 @@ class User extends DataObject {
             $this->throwError('email is required for the requestPasswordReset method');
         }
     }
-
+    
+    public function hasRole($name) {
+        
+        if (!empty($this->objectId)) {
+            $role = new \Parse\Role;
+            $role->where('name', $name);
+            $role->where('users', array(
+                "__type" => "Pointer",
+                "className" => "Users",
+                "objectId" => $this->objectId
+            ));
+            $role->get();
+            if ($role->name == 'admin') {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            $this->throwError('objectId is required for the hasRole method');
+        }
+    }
 }
-
-?>
