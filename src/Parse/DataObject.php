@@ -128,6 +128,7 @@ class DataObject extends \Parse {
         
         public function where($key, $value) {
             $this->_clauses[$key] = $value;
+            return $this;
         }
         
         private function classMapper($instance, $classNmae) {
