@@ -66,11 +66,15 @@ class DataObject extends \Parse {
                 $request->include = implode(',', $this->_includes);
             }
             
-            if (is_array($request->results) && count($request->results)) {
+            if (property_exists($request, 'results') && is_array($request->results) && count($request->results)) {
                 if (count($request->results) > 1) {
                     $return = array();
                     foreach ($request->results as $obj) {
-                        $return[] = $this->classMapper($obj, $this->_classNmae);
+                        if (class_exists('\Parse\\' . $this->_className)) {
+                            $return[] = $this->classMapper($obj, $this->_className);
+                        } else {
+                            $return[] = $obj;
+                        }
                     }
                     return $return;
                 } else {
@@ -79,6 +83,11 @@ class DataObject extends \Parse {
                     }
                     return $this;
                 }
+            } else if (property_exists($request, 'objectId')) {
+                foreach ($request as $key => $value) {
+                    $this->$key = $value;
+                }
+                return $this;
             } else {
                 return false;
             }
