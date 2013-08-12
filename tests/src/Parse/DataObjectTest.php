@@ -58,9 +58,10 @@ class DataObjectTest extends \PHPUnit_Framework_TestCase {
         
         $collateralWhere = new DataObject('Collateral');
         $collateralWhere->where('ManufacturerID', '1dCn8785mK');
-        $collateralWhere->get();
+        $collection = $collateralWhere->get();
+        $this->assertTrue(is_array($collection));
         
-        $this->assertEquals('Dominion Game Rules', $collateralWhere->FileName);
+        $this->assertEquals('Dominion Game Rules', $collection[0]->FileName);
         
     }
 

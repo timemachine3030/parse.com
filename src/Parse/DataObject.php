@@ -66,23 +66,19 @@ class DataObject extends \Parse {
                 $request->include = implode(',', $this->_includes);
             }
             
-            if (property_exists($request, 'results') && is_array($request->results) && count($request->results)) {
-                if (count($request->results) > 1) {
-                    $return = array();
-                    foreach ($request->results as $obj) {
-                        if (class_exists('\Parse\\' . $this->_className)) {
-                            $return[] = $this->classMapper($obj, $this->_className);
-                        } else {
-                            $return[] = $obj;
-                        }
+            if (property_exists($request, 'results') 
+                && is_array($request->results) 
+                && !self::is_assoc($request->results)
+            ) {
+                $return = array();
+                foreach ($request->results as $obj) {
+                    if (class_exists('\Parse\\' . $this->_className)) {
+                        $return[] = $this->classMapper($obj, $this->_className);
+                    } else {
+                        $return[] = $obj;
                     }
-                    return $return;
-                } else {
-                    foreach ($request->results[0] as $key => $value) {
-                        $this->$key = $value;
-                    }
-                    return $this;
                 }
+                return $return;    
             } else if (property_exists($request, 'objectId')) {
                 foreach ($request as $key => $value) {
                     $this->$key = $value;
@@ -138,6 +134,10 @@ class DataObject extends \Parse {
         public function where($key, $value) {
             $this->_clauses[$key] = $value;
             return $this;
+        }
+        
+        public static function is_assoc($array) {
+            return (bool)count(array_filter(array_keys($array), 'is_string'));
         }
         
         private function classMapper($instance, $classNmae) {
