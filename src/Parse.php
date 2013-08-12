@@ -46,30 +46,29 @@ class Parse {
         curl_setopt($c, CURLOPT_USERAGENT, 'parse.com-php-library/2.0');
         curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($c, CURLINFO_HEADER_OUT, true);
+        
+        $headers = array(
+            'X-Parse-Application-Id: '.$this->_appid,
+        );
+        
+        // Check if a file request, otherwise set the REST API Key.
         if(substr($args['requestUrl'],0,5) == 'files'){
-            curl_setopt($c, CURLOPT_HTTPHEADER, array(
-                'Content-Type: '.$args['contentType'],
-                'X-Parse-Application-Id: '.$this->_appid,
-                'X-Parse-Master-Key: '.$this->_masterkey
-            ));
+            $headers[] = 'Content-Type: '.$args['contentType'];
             $isFile = true;
+        } else {
+            $headers[] ='X-Parse-REST-API-Key: '.$this->_restkey;
+            $headers[] ='Content-Type: application/json';
         }
-        else if(substr($args['requestUrl'],0,5) == 'users' && isset($args['sessionToken'])){
-            curl_setopt($c, CURLOPT_HTTPHEADER, array(
-                'Content-Type: application/json',
-                'X-Parse-Application-Id: '.$this->_appid,
-                'X-Parse-REST-API-Key: '.$this->_restkey,
-                'X-Parse-Session-Token: '.$args['sessionToken']
-            ));
+        
+        // Use the session Token if provided, otherwise use the master key.
+        if (isset($args['sessionToken'])) {
+            $headers[] = 'X-Parse-Session-Token: '.$args['sessionToken'];
+        } else {
+            $headers[] = 'X-Parse-Master-Key: '.$this->_masterkey;
         }
-        else{
-            curl_setopt($c, CURLOPT_HTTPHEADER, array(
-                'Content-Type: application/json',
-                'X-Parse-Application-Id: '.$this->_appid,
-                'X-Parse-REST-API-Key: '.$this->_restkey,
-                'X-Parse-Master-Key: '.$this->_masterkey
-            ));	
-        }
+        
+        curl_setopt($c, CURLOPT_HTTPHEADER, $headers);
+        
         
         if($args['method'] == 'PUT' || $args['method'] == 'POST'){
             if($isFile){
