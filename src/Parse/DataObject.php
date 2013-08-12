@@ -6,6 +6,7 @@ class DataObject extends \Parse {
 	private $_className = '';
         protected $_url = 'classes';
         protected $_clauses = array();
+        protected $_sessionToken = false;
 
         public function __construct($class=''){
 		if($class != ''){
@@ -55,6 +56,10 @@ class DataObject extends \Parse {
                 'method' => 'GET',
                 'requestUrl' => $requestUrl
             );
+            
+            if ($this->_sessionToken) {
+                $args['sessionToken'] = $this->_sessionToken;
+            }
 
             if (count($this->_clauses)) {
                 $args['where'] = $this->_clauses;
@@ -147,6 +152,10 @@ class DataObject extends \Parse {
                 $className,
                 strstr(strstr(serialize($instance), '"'), ':')
             ));
+        }
+        
+        public function setSessionToken($token) {
+            $this->_sessionToken = $token;
         }
 }
 
