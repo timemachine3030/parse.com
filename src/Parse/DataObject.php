@@ -3,10 +3,13 @@
 namespace Parse;
 class DataObject extends \Parse {
 	public $_includes = array();
+        public $data = array();
 	private $_className = '';
+        
         protected $_url = 'classes';
         protected $_clauses = array();
         protected $_sessionToken = false;
+        
 
         public function __construct($class=''){
 		if($class != ''){
@@ -41,7 +44,7 @@ class DataObject extends \Parse {
 	}
 
     public function get($id = false) {
-        if (!$id && $this->objectId) {
+        if (!$id && array_key_exists('objectId', $this->data)) {
             $id = $this->objectId;
         }
         
