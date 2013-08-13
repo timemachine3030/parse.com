@@ -6,6 +6,11 @@ class Parse {
     private $_masterkey = '';
     private $_restkey = '';
     private $_parseurl = '';
+    
+    protected $_count = 1;
+    protected $_limit = false;
+    protected $_skip  = false;
+    protected $_order = false;
 
     public $data;
     public $requestUrl = '';
@@ -79,13 +84,22 @@ class Parse {
             }
 
             curl_setopt($c, CURLOPT_POSTFIELDS, $postData );
-        } else if (array_key_exists('where', $args)) {
-            $where_clause = json_encode($args['where']);
-            $new_url = array(
-                'query' => http_build_query(array(
-                    'where' => $where_clause
-                ))
-            );
+        } else if ($args['method'] == 'GET') {
+            $query = array();
+            
+            if (array_key_exists('where', $args)) {
+                $query['where'] = json_encode($args['where']);
+            }
+            
+            $fields = array('limit', 'skip', 'count', 'order');
+            foreach ($fields as $field) {
+                $prop = '_' . $field;
+                if ($this->$prop) {
+                    $query[$field] = $this->$prop;
+                }
+            }
+            
+            $new_url = array('query' => http_build_query($query));
             $url = http_build_url($url, $new_url, HTTP_URL_JOIN_QUERY);;
         }
         
@@ -181,6 +195,18 @@ class Parse {
 
     public function throwError($msg,$code=0){
         throw new ParseLibraryException($msg,$code);
+    }
+    
+    public function limit($int) {
+        $this->_limit = $int;
+    }
+
+    public function skip($int) {
+        $this->_skip = $int;
+    }
+
+    public function order($int) {
+        $this->_order = $int;
     }
 
     private function checkResponse($response,$responseCode,$expectedCode){

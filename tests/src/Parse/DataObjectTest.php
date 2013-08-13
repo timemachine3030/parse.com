@@ -44,10 +44,19 @@ class DataObjectTest extends \PHPUnit_Framework_TestCase {
     public function testGet() {
         // Get an array of all
         $collateralAll = new DataObject('Collateral');
-        $all = $collateralAll->get();
+        $pageOne = $collateralAll->get(5);
+        $this->assertTrue(is_array($pageOne->results));
+        $this->assertEquals(5, count($pageOne->results));
+        $this->assertEquals(5, $pageOne->perPage);
+        $this->assertEquals(1, $pageOne->page);
+        $this->assertGreaterThan(5, $pageOne->count);
         
-        $this->assertTrue(is_array($all));
-        $this->assertGreaterThan(1, count($all));
+        $pageTwo = $collateralAll->get(5, 15);
+        $this->assertTrue(is_array($pageTwo->results));
+        $this->assertEquals(5, count($pageTwo->results));
+        $this->assertEquals(5, $pageTwo->perPage);
+        $this->assertEquals(4, $pageTwo->page);
+        $this->assertGreaterThan(5, $pageTwo->count);
         
         // Get Specific
         $collateralSpecific = new DataObject('Collateral');
@@ -59,9 +68,9 @@ class DataObjectTest extends \PHPUnit_Framework_TestCase {
         $collateralWhere = new DataObject('Collateral');
         $collateralWhere->where('ManufacturerID', '1dCn8785mK');
         $collection = $collateralWhere->get();
-        $this->assertTrue(is_array($collection));
+        $this->assertTrue(is_array($collection->results));
         
-        $this->assertEquals('Dominion Game Rules', $collection[0]->FileName);
+        $this->assertEquals('Dominion Game Rules', $collection->results[0]->FileName);
         
     }
 

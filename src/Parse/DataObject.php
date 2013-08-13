@@ -43,8 +43,8 @@ class DataObject extends \Parse {
 		}
 	}
 
-    public function get($id = false) {
-        if (!$id && array_key_exists('objectId', $this->data)) {
+    public function get($limit = false, $skip = false, $order = false) {
+        if (array_key_exists('objectId', $this->data)) {
             $id = $this->objectId;
         }
         
@@ -54,6 +54,10 @@ class DataObject extends \Parse {
             } else {
                 $requestUrl = $this->_url . '/' . $this->_className;
             }
+            
+            $this->limit($limit);
+            $this->skip($skip);
+            $this->order($order);
             
             $args = array(
                 'method' => 'GET',
@@ -78,14 +82,41 @@ class DataObject extends \Parse {
                 && is_array($request->results) 
                 && !self::is_assoc($request->results)
             ) {
-                $return = array();
-                foreach ($request->results as $obj) {
-                    if (class_exists('\Parse\\' . $this->_className)) {
-                        $return[] = $this->classMapper($obj, $this->_className);
+                $return = new Results;
+                if (class_exists('\Parse\\' . $this->_className)) {
+                    
+                    foreach ($request->results as $obj) {
+                        $return->results[] = $this->classMapper($obj, $this->_className);
+                    }
+                } else {
+                    $return->results = $request->results;
+                }
+                    
+                if (property_exists($request, 'count')) {
+                    $return->count = $request->count;
+                } else {
+                    $return->count = count($results);
+                }
+                
+                // Page = floor(skip/limit)
+                if (!$this->_skip) {
+                    $return->page = 1;
+                    if (!$this->_limit) {
+                        $return->perPage = 100;
                     } else {
-                        $return[] = $obj;
+                        $return->perPage = $this->_limit;
+                    }
+                } else {
+                    if (!$this->_limit) {
+                        $return->page = floor($this->_skip / 100) + 1; // 100 it the Parse.com default limit.
+                        $return->perPage = 100;
+                    } else {
+                        $return->page = floor($this->_skip / $this->_limit) + 1;
+                        $return->perPage = $this->_limit;
                     }
                 }
+                
+                
                 return $return;    
             } else if (property_exists($request, 'objectId')) {
                 foreach ($request as $key => $value) {
