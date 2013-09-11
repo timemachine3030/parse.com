@@ -47,6 +47,7 @@ class Parse {
         $url = $this->_parseurl . $args['requestUrl'];
         
         $c = curl_init();
+        curl_setopt($c, CURLOPT_VERBOSE, TRUE);
         curl_setopt($c, CURLOPT_TIMEOUT, 30);
         curl_setopt($c, CURLOPT_USERAGENT, 'parse.com-php-library/2.0');
         curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
@@ -229,6 +230,7 @@ class Parse {
 
 
 class ParseLibraryException extends Exception{
+    public $message, $code;
     public function __construct($message, $code = 0, Exception $previous = null) {
         //codes are only set by a parse.com error
         if($code != 0){
