@@ -58,6 +58,10 @@ class DataObjectTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(4, $pageTwo->page);
         $this->assertGreaterThan(5, $pageTwo->count);
         
+        $collateralAll->where('FileName', array('$regex' => 'LED'));
+            
+        $sorted = $collateralAll->get(1, 0, '-ShareCount');
+        $this->assertEquals('SD17060E Ethernet/IP Stepper Drive', $sorted->results[0]->FileName);
         // Get Specific
         $collateralSpecific = new DataObject('Collateral');
         $collateralSpecific->objectId = 'lCYTB4yye4';
@@ -71,6 +75,17 @@ class DataObjectTest extends \PHPUnit_Framework_TestCase {
         $this->assertTrue(is_array($collection->results));
         
         $this->assertEquals('Dominion Game Rules', $collection->results[0]->FileName);
+        
+    }
+    
+    public function testmatch() {
+        $stories = new DataObject('AppStories');
+        $story1 = $stories->matches('Title', 'test')->get(false, false, '-createdAt');
+        $this->assertEquals('test image thumbnail', $story1->results[0]->Title);
+        
+        // Case Insensitive
+        $story2 = $stories->matches('Title', 'Test', 'im')->get(false, false, '-createdAt');
+        $this->assertEquals('test image thumbnail', $story2->results[0]->Title);
         
     }
 

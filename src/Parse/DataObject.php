@@ -2,52 +2,58 @@
 
 namespace Parse;
 class DataObject extends \Parse {
-	public $_includes = array();
-        public $data = array();
-	private $_className = '';
-        
-        protected $_url = 'classes';
-        protected $_clauses = array();
-        protected $_sessionToken = false;
-        
 
-        public function __construct($class=''){
-		if($class != ''){
-			$this->_className = $class;
-		}
-		else{
-			$this->throwError('include the className when creating a parseObject');
-		}
+    public $_includes = array();
+    public $data = array();
+    private $_className = '';
+    protected $_url = 'classes';
+    protected $_clauses;
+    protected $_sessionToken = false;
+    
+    private function addCondition($key, $condition, $value) {
+        if (!array_key_exists($key, $this->_clauses)) {
+            $this->_clauses->$key = new \StdClass();
+        }
+        $this->_clauses->$key->$condition = $value;
+    }
 
-		parent::__construct();
-	}
-
-	public function __set($name,$value){
-		if($name != '_className'){
-			$this->data[$name] = $value;
-		}
-	}
-        
-        public function __get($name) {
-            return $this->data[$name];
+    public function __construct($class = '') {
+        if ($class != '') {
+            $this->_className = $class;
+        } else {
+            $this->throwError('include the className when creating a parseObject');
         }
 
-	public function save(){
-		if(count($this->data) > 0 && $this->_className != ''){
-			$request = $this->request(array(
-				'method' => 'POST',
-				'requestUrl' => $this->_url . '/' . $this->_className,
-				'data' => $this->data,
-			));
-			return $request;
-		}
-	}
+        $this->_clauses = new \StdClass();
+        parent::__construct();
+    }
+
+    public function __set($name, $value) {
+        if ($name != '_className') {
+            $this->data[$name] = $value;
+        }
+    }
+
+    public function __get($name) {
+        return $this->data[$name];
+    }
+
+    public function save() {
+        if (count($this->data) > 0 && $this->_className != '') {
+            $request = $this->request(array(
+                'method' => 'POST',
+                'requestUrl' => $this->_url . '/' . $this->_className,
+                'data' => $this->data,
+            ));
+            return $request;
+        }
+    }
 
     public function get($limit = false, $skip = false, $order = false) {
         if (array_key_exists('objectId', $this->data)) {
             $id = $this->objectId;
         }
-        
+
         if ($this->_className != '') {
             if (!empty($id)) {
                 $requestUrl = $this->_url . '/' . $this->_className . '/' . $id;
@@ -131,66 +137,76 @@ class DataObject extends \Parse {
         }
     }
 
-	public function update($id = false){
-            if (!$id && $this->objectId) {
-                $id = $this->objectId;
-            }
-		if($this->_className != '' || !empty($id)){
-			$request = $this->request(array(
-				'method' => 'PUT',
-				'requestUrl' => $this->_url . '/' . $this->_className.'/'.$id,
-				'data' => $this->data,
-			));
-
-			return $request;
-		}
-	}
-
-	public function increment($field,$amount){
-		$this->data[$field] = $this->dataType('increment', $amount);
-	}
-
-	public function decrement($id){
-		$this->data[$field] = $this->dataType('decrement', $amount);
-	}
-
-
-	public function delete($id){
-		if($this->_className != '' || !empty($id)){
-			$request = $this->request(array(
-				'method' => 'DELETE',
-				'requestUrl' => $this->_url . '/' . $this->_className.'/'.$id
-			));
-
-			return $request;
-		}		
-	}
-
-	public function addInclude($name){
-		$this->_includes[] = $name;
-	}
-        
-        public function where($key, $value) {
-            $this->_clauses[$key] = $value;
-            return $this;
+    public function update($id = false) {
+        if (!$id && $this->objectId) {
+            $id = $this->objectId;
         }
-        
-        public static function is_assoc($array) {
-            return (bool)count(array_filter(array_keys($array), 'is_string'));
-        }
-        
-        private function classMapper($instance, $classNmae) {
-            return unserialize(sprintf(
-                'O:%d:"%s"%s',
-                strlen($className),
-                $className,
-                strstr(strstr(serialize($instance), '"'), ':')
+        if ($this->_className != '' || !empty($id)) {
+            $request = $this->request(array(
+                'method' => 'PUT',
+                'requestUrl' => $this->_url . '/' . $this->_className . '/' . $id,
+                'data' => $this->data,
             ));
-        }
-        
-        public function setSessionToken($token) {
-            $this->_sessionToken = $token;
-        }
-}
 
-?>
+            return $request;
+        }
+    }
+
+	public function increment($field, $amount) {
+        $this->data[$field] = $this->dataType('increment', $amount);
+    }
+
+    public function decrement($id) {
+        $this->data[$field] = $this->dataType('decrement', $amount);
+    }
+
+    public function delete($id) {
+        if ($this->_className != '' || !empty($id)) {
+            $request = $this->request(array(
+                'method' => 'DELETE',
+                'requestUrl' => $this->_url . '/' . $this->_className . '/' . $id
+            ));
+
+            return $request;
+        }
+    }
+
+    public function addInclude($name) {
+        $this->_includes[] = $name;
+    }
+
+    public function where($key, $value) {
+        if (is_array($value)) {
+            foreach ($value as $condition => $v) {
+                $this->addCondition($key, $condition, $v);
+            }
+        }
+        $this->_clauses->$key = $value;
+        return $this;
+    }
+
+    public function matches($key, $regex, $modifiers = '') {
+        $this->addCondition($key, '$regex', $regex);
+
+        if ($modifiers && strlen($modifiers)) {
+            $this->addCondition($key, '$options', $modifiers);
+        }
+
+        return $this;
+    }
+
+    public static function is_assoc($array) {
+        return (bool) count(array_filter(array_keys($array), 'is_string'));
+    }
+
+    private function classMapper($instance, $classNmae) {
+        return unserialize(sprintf(
+                        'O:%d:"%s"%s', strlen($className), $className, strstr(strstr(serialize($instance), '"'), ':')
+        ));
+    }
+
+    public function setSessionToken($token) {
+        $this->_sessionToken = $token;
+    }
+
+}
