@@ -35,7 +35,12 @@ class DataObject extends \Parse {
     }
 
     public function __get($name) {
-        return $this->data[$name];
+        if (array_key_exists($name, $this->data)) {
+            return $this->data[$name];
+        } else {
+            return null;
+        }
+        
     }
 
     public function save() {
