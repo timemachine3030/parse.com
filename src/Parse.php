@@ -195,7 +195,7 @@ class Parse {
     }
 
     public function throwError($msg,$code=0){
-        throw new ParseLibraryException($msg,$code);
+        throw new Exception($msg,$code);
     }
     
     public function limit($int) {
@@ -214,7 +214,11 @@ class Parse {
         //TODO: Need to also check for response for a correct result from parse.com
         if(!in_array($responseCode,$expectedCode)){
             $error = json_decode($response);
-            $this->throwError($error->error,$error->code);
+            if (is_object($error)) {
+                throw new Exception($error->error, $error->code);
+            } else {
+                throw new Exception("Data server responded with: $responseCode, $response");
+            }
         }
         else{
             //check for empty return
