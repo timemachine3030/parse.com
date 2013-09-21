@@ -82,12 +82,11 @@ class DataObject extends \Parse {
             if (count($this->_clauses)) {
                 $args['where'] = $this->_clauses;
             }
+            if (!empty($this->_includes)) {
+                $args['include'] = implode(',', $this->_includes);
+            }
 
             $request = $this->request($args);
-
-            if (!empty($this->_includes)) {
-                $request->include = implode(',', $this->_includes);
-            }
             
             if (property_exists($request, 'results') 
                 && is_array($request->results) 

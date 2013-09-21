@@ -91,6 +91,10 @@ class Parse {
             if (array_key_exists('where', $args)) {
                 $query['where'] = json_encode($args['where']);
             }
+            if (array_key_exists('include', $args)) {
+                $query['include'] = $args['include'];
+                
+            }
             
             $fields = array('limit', 'skip', 'count', 'order');
             foreach ($fields as $field) {

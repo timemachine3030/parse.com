@@ -65,11 +65,11 @@ class UserTest extends \PHPUnit_Framework_TestCase {
         
         $this->assertTrue($user->hasRole('admin'));
            
-        $user = new \Parse\User;
+        /*$user = new \Parse\User;
         $user->where('username', 'dan_test2');
         $user->get();
         
-        $this->assertFalse($user->hasRole('admin'));
+        $this->assertFalse($user->hasRole('admin'));*/
     }
     /**
      * @covers Parse\User::login
