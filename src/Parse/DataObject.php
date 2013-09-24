@@ -10,7 +10,6 @@ class DataObject extends \Parse {
 
     public $data = array();
     protected $_url = 'classes';
-    protected $_sessionToken = false;
     
     private function addCondition($key, $condition, $value) {
         if (!array_key_exists($key, $this->_where)) {
@@ -77,9 +76,6 @@ class DataObject extends \Parse {
                 'requestUrl' => $requestUrl
             );
             
-            if ($this->_sessionToken) {
-                $args['sessionToken'] = $this->_sessionToken;
-            }
 
             if (count($this->_where)) {
                 $args['where'] = $this->_where;
@@ -230,9 +226,4 @@ class DataObject extends \Parse {
                         'O:%d:"%s"%s', strlen($className), $className, strstr(strstr(serialize($instance), '"'), ':')
         ));
     }
-
-    public function setSessionToken($token) {
-        $this->_sessionToken = $token;
-    }
-
 }

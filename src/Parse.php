@@ -11,7 +11,9 @@ class Parse {
     protected $_limit = false;
     protected $_skip  = false;
     protected $_order = false;
-
+    protected $_useMasterToken = false;
+    protected $_sessionToken = false;
+    
     public $data;
     public $requestUrl = '';
     public $returnData = '';
@@ -66,11 +68,15 @@ class Parse {
             $headers[] ='Content-Type: application/json';
         }
         
-        // Use the session Token if provided, otherwise use the master key.
-        if (isset($args['sessionToken'])) {
-            $headers[] = 'X-Parse-Session-Token: '.$args['sessionToken'];
-        } else {
+        if ($this->_useMasterKey) {
             $headers[] = 'X-Parse-Master-Key: '.$this->_masterkey;
+        }
+        if ($this->_sessionToken) {
+            $headers[] = 'X-Parse-Session-Token: '.$args['sessionToken'];
+        }
+        
+        if (!$this->_sessionToken && !$this->_useMasterToken) {
+            throw new Exception('Must provide a session token or explicitly use the Master Key.');
         }
         
         curl_setopt($c, CURLOPT_HTTPHEADER, $headers);
@@ -213,6 +219,12 @@ class Parse {
     public function order($int) {
         $this->_order = $int;
     }
+    public function setSessionToken($token) {
+        $this->_sessionToken = $token;
+    }
+    public function useMasterToken() {
+        $this->_useMasterToken = true;
+    }
 
     private function checkResponse($response,$responseCode,$expectedCode){
         //TODO: Need to also check for response for a correct result from parse.com
@@ -253,5 +265,3 @@ class ParseLibraryException extends Exception{
     }
 
 }
-
-?>
