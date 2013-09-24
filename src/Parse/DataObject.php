@@ -3,18 +3,20 @@
 namespace Parse;
 class DataObject extends \Parse {
 
-    public $_includes = array();
+    private $_className;
+    private $_include = array();
+    private $_select = array();
+    private $_where;
+
     public $data = array();
-    private $_className = '';
     protected $_url = 'classes';
-    protected $_clauses;
     protected $_sessionToken = false;
     
     private function addCondition($key, $condition, $value) {
-        if (!array_key_exists($key, $this->_clauses)) {
-            $this->_clauses->$key = new \StdClass();
+        if (!array_key_exists($key, $this->_where)) {
+            $this->_where->$key = new \StdClass();
         }
-        $this->_clauses->$key->$condition = $value;
+        $this->_where->$key->$condition = $value;
     }
 
     public function __construct($class = '') {
@@ -24,7 +26,7 @@ class DataObject extends \Parse {
             $this->throwError('include the className when creating a parseObject');
         }
 
-        $this->_clauses = new \StdClass();
+        $this->_where = new \StdClass();
         parent::__construct();
     }
 
@@ -79,11 +81,11 @@ class DataObject extends \Parse {
                 $args['sessionToken'] = $this->_sessionToken;
             }
 
-            if (count($this->_clauses)) {
-                $args['where'] = $this->_clauses;
+            if (count($this->_where)) {
+                $args['where'] = $this->_where;
             }
-            if (!empty($this->_includes)) {
-                $args['include'] = implode(',', $this->_includes);
+            if (!empty($this->_include)) {
+                $args['include'] = implode(',', $this->_include);
             }
 
             $request = $this->request($args);
@@ -176,7 +178,7 @@ class DataObject extends \Parse {
     }
 
     public function addInclude($name) {
-        $this->_includes[] = $name;
+        $this->_include[] = $name;
     }
 
     public function where($key, $value) {
@@ -185,7 +187,7 @@ class DataObject extends \Parse {
                 $this->addCondition($key, $condition, $v);
             }
         }
-        $this->_clauses->$key = $value;
+        $this->_where->$key = $value;
         return $this;
     }
 
@@ -197,6 +199,26 @@ class DataObject extends \Parse {
         }
 
         return $this;
+    }
+    public function matchesQuery($key, $query) {
+        if (!$query instanceOf StdClass && method_exists($query, 'toTransient')) {
+            $query = $query->toTransient();
+        }
+
+        $this->addCondition($key, '$inQuery', $query);
+    }
+    public function toTransient() {
+        $transient = new \StdClass();
+
+        foreach(array('className', 'include', 'select', 'limit', 'skip', 'order', 'where') as $key) {
+            $prop = "_$key";
+            if (is_array($this->$prop) && count($this->$prop)) {
+                $transient->$key = implode(',', $this->$prop);
+            } else if (!empty($this->$prop)) {
+                $transient->$key = $this->$prop;
+            }
+        }
+        return $transient;
     }
 
     public static function is_assoc($array) {
