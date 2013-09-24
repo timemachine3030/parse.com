@@ -74,11 +74,6 @@ class Parse {
         if ($this->_sessionToken) {
             $headers[] = 'X-Parse-Session-Token: '.$args['sessionToken'];
         }
-        
-        if (!$this->_sessionToken && !$this->_useMasterToken) {
-            throw new Exception('Must provide a session token or explicitly use the Master Key.');
-        }
-        
         curl_setopt($c, CURLOPT_HTTPHEADER, $headers);
         
         
