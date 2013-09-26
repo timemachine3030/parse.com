@@ -9,6 +9,7 @@ class DataObject extends \Parse {
     private $_where;
 
     public $data = array();
+    public $acl;
     protected $_url = 'classes';
     
     private function addCondition($key, $condition, $value) {
@@ -24,6 +25,8 @@ class DataObject extends \Parse {
         } else {
             $this->throwError('include the className when creating a parseObject');
         }
+
+        $this->acl = new ACL;
 
         $this->_where = new \StdClass();
         parent::__construct();
@@ -46,10 +49,14 @@ class DataObject extends \Parse {
 
     public function save() {
         if (count($this->data) > 0 && $this->_className != '') {
+            $data = $this->data;
+            if ($this->acl instanceOf ACL) {
+                $data['ACL'] = $this->acl->toTransient();
+            }
             $request = $this->request(array(
                 'method' => 'POST',
                 'requestUrl' => $this->_url . '/' . $this->_className,
-                'data' => $this->data,
+                'data' => $data,
             ));
             return $request;
         }
@@ -144,10 +151,14 @@ class DataObject extends \Parse {
             $id = $this->objectId;
         }
         if ($this->_className != '' || !empty($id)) {
+            $data = $this->data;
+            if ($this->acl instanceOf ACL) {
+                $data['ACL'] = $this->acl->toTransient();
+            }
             $request = $this->request(array(
                 'method' => 'PUT',
                 'requestUrl' => $this->_url . '/' . $this->_className . '/' . $id,
-                'data' => $this->data,
+                'data' => $data,
             ));
 
             return $request;

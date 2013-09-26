@@ -11,7 +11,7 @@ class Parse {
     protected $_limit = false;
     protected $_skip  = false;
     protected $_order = false;
-    protected $_useMasterToken = false;
+    protected $_useMasterKey = false;
     protected $_sessionToken = false;
     
     public $data;
@@ -72,7 +72,7 @@ class Parse {
             $headers[] = 'X-Parse-Master-Key: '.$this->_masterkey;
         }
         if ($this->_sessionToken) {
-            $headers[] = 'X-Parse-Session-Token: '.$args['sessionToken'];
+            $headers[] = 'X-Parse-Session-Token: ' . $this->_sessionToken;
         }
         curl_setopt($c, CURLOPT_HTTPHEADER, $headers);
         
@@ -104,6 +104,7 @@ class Parse {
                     $query[$field] = $this->$prop;
                 }
             }
+
             
             $new_url = array('query' => http_build_query($query));
             $url = http_build_url($url, $new_url, HTTP_URL_JOIN_QUERY);;
@@ -143,7 +144,7 @@ class Parse {
         return $this->checkResponse($response,$responseCode,$expectedCode);
     }
 
-    public function dataType($type,$params){
+    public function dataType($type, $params){
         if($type != ''){
             switch($type){
             case 'date':
@@ -217,8 +218,8 @@ class Parse {
     public function setSessionToken($token) {
         $this->_sessionToken = $token;
     }
-    public function useMasterToken() {
-        $this->_useMasterToken = true;
+    public function useMasterKey() {
+        $this->_useMasterKey = true;
     }
 
     private function checkResponse($response,$responseCode,$expectedCode){
