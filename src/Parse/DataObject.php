@@ -9,7 +9,6 @@ class DataObject extends \Parse {
     private $_where;
 
     public $data = array();
-    public $acl;
     protected $_url = 'classes';
     
     private function addCondition($key, $condition, $value) {
@@ -26,7 +25,7 @@ class DataObject extends \Parse {
             $this->throwError('include the className when creating a parseObject');
         }
 
-        $this->acl = new ACL;
+        //$this->acl = new ACL;
 
         $this->_where = new \StdClass();
         parent::__construct();
@@ -39,6 +38,12 @@ class DataObject extends \Parse {
     }
 
     public function __get($name) {
+        if (strtolower($name) == 'acl') {
+            if (!array_key_exists('acl', $this->data)) {
+                $this->data['ACL'] = new ACL;
+            }
+            return $this->data['ACL'];
+        }
         if (array_key_exists($name, $this->data)) {
             return $this->data[$name];
         } else {
@@ -150,6 +155,7 @@ class DataObject extends \Parse {
         if (!$id && $this->objectId) {
             $id = $this->objectId;
         }
+        var_dump($id);
         if ($this->_className != '' || !empty($id)) {
             $data = $this->data;
             if ($this->acl instanceOf ACL) {
