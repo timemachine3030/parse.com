@@ -160,8 +160,7 @@ class User extends DataObject {
             $request = $this->request(array(
                 'method' => 'POST',
                 'requestUrl' => 'requestPasswordReset',
-                'email' => $email,
-                'data' => $this->data
+                'data' => array('email' => $email)
             ));
 
             return $request;

@@ -25,7 +25,6 @@ class DataObject extends \Parse {
             $this->throwError('include the className when creating a parseObject');
         }
 
-        //$this->acl = new ACL;
 
         $this->_where = new \StdClass();
         parent::__construct();
@@ -39,7 +38,7 @@ class DataObject extends \Parse {
 
     public function __get($name) {
         if (strtolower($name) == 'acl') {
-            if (!array_key_exists('acl', $this->data)) {
+            if (!array_key_exists('ACL', $this->data)) {
                 $this->data['ACL'] = new ACL;
             }
             return $this->data['ACL'];
@@ -155,7 +154,6 @@ class DataObject extends \Parse {
         if (!$id && $this->objectId) {
             $id = $this->objectId;
         }
-        var_dump($id);
         if ($this->_className != '' || !empty($id)) {
             $data = $this->data;
             if ($this->acl instanceOf ACL) {

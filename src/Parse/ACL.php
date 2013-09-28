@@ -136,7 +136,7 @@ class ACL {
 	public function setRoleReadAccess($role, $allowed) {
 		$this->setAccessForKey('read', 'role:' . $role, $allowed);
 	}
-	public function setWriteAccessForRole($role, $allowed){
+	public function setRoleWriteAccess($role, $allowed){
 		$this->setAccessForKey('write', 'role:' . $role, $allowed);
 	}
 
