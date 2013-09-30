@@ -12,7 +12,7 @@ class DataObject extends \Parse {
     protected $_url = 'classes';
     
     private function addCondition($key, $condition, $value) {
-        if (!array_key_exists($key, $this->_where)) {
+        if (!property_exists($this->_where, $key)) {
             $this->_where->$key = new \StdClass();
         }
         $this->_where->$key->$condition = $value;
@@ -197,8 +197,9 @@ class DataObject extends \Parse {
             foreach ($value as $condition => $v) {
                 $this->addCondition($key, $condition, $v);
             }
-        }
-        $this->_where->$key = $value;
+        } else {
+            $this->_where->$key = $value;
+        } 
         return $this;
     }
 
