@@ -24,6 +24,10 @@ class DataObject extends \Parse {
         } else {
             $this->throwError('include the className when creating a parseObject');
         }
+        
+        if ($class == 'installations') {
+            $this->_url = '';
+        }
 
 
         $this->_where = new \StdClass();
