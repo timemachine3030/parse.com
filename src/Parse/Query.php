@@ -2,10 +2,10 @@
 
 namespace Parse;
 class Query extends \Parse {
-	private $_limit = 100;
-	private $_skip = 0;
-	private $_count = 0;
-	private $_order = array();
+	private $_qlimit = 100;
+	private $_qskip = 0;
+	private $_qcount = false;
+	private $_qorder = array();
 	private $_query = array();
 	private $_include = array();
 
@@ -41,16 +41,16 @@ class Query extends \Parse {
 			if(!empty($this->_include)){
 				$urlParams['include'] = implode(',',$this->_include);
 			}
-			if(!empty($this->_order)){
-				$urlParams['order'] = implode(',',$this->_order);
+			if(!empty($this->_qorder)){
+				$urlParams['order'] = implode(',',$this->_qorder);
 			}
-			if(!empty($this->_limit) || $this->_limit == 0){
-				$urlParams['limit'] = $this->_limit;
+			if(!empty($this->_qlimit) || $this->_qlimit == 0){
+				$urlParams['limit'] = $this->_qlimit;
 			}
-			if(!empty($this->_skip)){
-				$urlParams['skip'] = $this->_skip;
+			if(!empty($this->_qskip)){
+				$urlParams['skip'] = $this->_qskip;
 			}
-			if($this->_count == 1){
+			if($this->_qcount == 1){
 				$urlParams['count'] = '1';
 			}
 
@@ -64,9 +64,9 @@ class Query extends \Parse {
 		}
 	}
 	//setting this to 1 by default since you'd typically only call this function if you were wanting to turn it on
-  public function setCount($bool=1){
+  public function setCount($bool=false){
   	if(is_bool($bool)){
-  		$this->_count = $bool;
+  		$this->_qcount = $bool;
   	}
 		else{
 			$this->throwError('setCount requires a boolean paremeter');
@@ -74,14 +74,14 @@ class Query extends \Parse {
   }
 
 	public function getCount(){
-		$this->_count = 1;
-		$this->_limit = 0;
+		$this->_qcount = 1;
+		$this->_qlimit = 0;
 		return $this->find();
 	}
 
 	public function setLimit($int){
 		if ($int >= 1 && $int <= 1000){
-			$this->_limit = $int;
+			$this->_qlimit = $int;
 		}
 		else{
 			$this->throwError('parse requires the limit parameter be between 1 and 1000');
@@ -89,18 +89,18 @@ class Query extends \Parse {
 	}
 
 	public function setSkip($int){
-		$this->_skip = $int;
+		$this->_qskip = $int;
 	}
 
 	public function orderBy($field){
 		if(!empty($field)){
-			$this->_order[] = $field;
+			$this->_qorder[] = $field;
 		}
 	}
 
 	public function orderByAscending($value){
 		if(is_string($value)){
-			$this->_order[] = $value;
+			$this->_qorder[] = $value;
 		}
 		else{
 			$this->throwError('the order parameter on a query must be a string');
@@ -109,7 +109,7 @@ class Query extends \Parse {
 
 	public function orderByDescending($value){
 		if(is_string($value)){
-			$this->_order[] = '-'.$value;
+			$this->_qorder[] = '-'.$value;
 		}
 		else{
 			$this->throwError('the order parameter on parseQuery must be a string');
@@ -291,7 +291,17 @@ class Query extends \Parse {
 		}
 		
 	}
-
+	
+	public function whereRelatedTo($key, $className, $objectId){
+		if (isset($key) && isset($className)) {
+			$this->_query = array(
+				'$relatedTo' => array('object' => $this->dataType('pointer', array($className, $objectId)), 'key' => $key)
+			);
+		} else {
+			$this->throwError('the $key and $className parameters must be set when setting a "where" pointer query method');
+		}
+	}
+	
 	public function whereInQuery($key,$className,$inQuery){
 		if(isset($key) && isset($className)){
 			$this->_query[$key] = array(
