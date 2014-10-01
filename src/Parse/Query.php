@@ -59,8 +59,33 @@ class Query extends \Parse {
 				'requestUrl' => $this->_requestUrl,
 				'urlParams' => $urlParams,
 			));
+			$return->results = $request->results;
+			
+			if (property_exists($request, 'count')) {
+			    $return->count = $request->count;
+			} else {
+			    $return->count = count($results);
+			}
+			
+			// Page = floor(skip/limit)
+			if (!$this->_qskip) {
+			    $return->page = 1;
+			    if (!$this->_qlimit) {
+			        $return->perPage = 100;
+			    } else {
+			        $return->perPage = $this->_qlimit;
+			    }
+			} else {
+			    if (!$this->_qlimit) {
+			        $return->page = floor($this->_qskip / 100) + 1; // 100 it the Parse.com default limit.
+			        $return->perPage = 100;
+			    } else {
+			        $return->page = floor($this->_qskip / $this->_qlimit) + 1;
+			        $return->perPage = $this->_qlimit;
+			    }
+			}
 
-			return $request;
+			return $return;
 		}
 	}
 	//setting this to 1 by default since you'd typically only call this function if you were wanting to turn it on
